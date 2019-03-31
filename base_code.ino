@@ -5,8 +5,8 @@ boolean obstacle, leftError, rightError;
  
 void setup() {
   Serial.begin (9600);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  pinMode(trigPin, OUTPUT); //The Trig pin win send sound waves.
+  pinMode(echoPin, INPUT); //The Echo pin will detect sound waves.
 }
  
 void loop() {
@@ -20,9 +20,9 @@ void calcDistance()
 {
   //randomnerdtutorials.com code begins here
   digitalWrite(trigPin, LOW);
-  delayMicroseconds(5);
+  delayMicroseconds(5); //Delays are required for a successful sensor operation.
   digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(10); //This delay is also required.
   digitalWrite(trigPin, LOW);
  
   // Read the signal from the sensor: a HIGH pulse whose
