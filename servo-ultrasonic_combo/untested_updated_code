@@ -1,0 +1,171 @@
+#include <Servo.h>
+ 
+const int servoPin = 6;
+const int rightTrig = 7;
+const int rightEcho = 8;
+const int leftTrig = 9;
+const int leftEcho = 10;
+unsigned long duration, durationL, durationR, cm, inches;
+boolean obstacle, leftError, rightError, turnDir;
+ 
+Servo servo;  
+ 
+int servoAngle = 0;
+
+void setup()
+{
+  Serial.begin(9600);  
+
+  pinMode(leftTrig, OUTPUT);
+  pinMode(leftEcho, INPUT);
+  pinMode(rightTrig, OUTPUT);
+  pinMode(rightEcho, INPUT);
+  
+  servo.attach(servoPin);
+
+  //This line is to set the servo motor to it's middle position, since it isn't able to rotate in the negative direction.
+  servoWrite(90);
+}
+
+void loop() {
+  calcDistance();
+  obstacleCheck();
+  readOut();
+  delay(2500); 
+}
+ 
+void calcDistance()
+{
+  digitalWrite(leftTrig, LOW);
+  delayMicroseconds(5);
+  digitalWrite(leftTrig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(leftTrig, LOW);
+ 
+  // Read the signal from the sensor: a HIGH pulse whose
+  // duration is the time (in microseconds) from the sending
+  // of the ping to the reception of its echo off of an object.
+  pinMode(leftEcho, INPUT);
+  durationL = pulseIn(leftEcho, HIGH);
+
+  digitalWrite(rightTrig, LOW);
+  delayMicroseconds(5);
+  digitalWrite(rightTrig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(rightTrig, LOW);
+
+  pinMode(rightEcho, INPUT);
+  durationR = pulseIn(rightEcho, HIGH);
+
+  if (durationL > durationR)
+  {
+    duration = durationL;
+  }
+  else
+  {
+    duration = durationR;
+  }
+
+  //randomnerdtutorials.com code begins here
+  // Convert the time into a distance
+  cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  inches = (duration/2) / 74;   // Divide by 74 or multiply by 0.0135
+  //randomnerdtutorials.com code ends here
+  //https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/
+}
+
+void obstacleCheck()
+{
+  if (cm < 20)
+  {
+    Serial.println("Obstacle in the way!");
+    obstacle = true;
+    turnCheck();
+  }
+}
+
+int pickASide()
+{
+  if (durationL > durationR)
+  {
+    turnDir = true;
+    return durationL;
+  }
+  else
+  {
+    turnDir = false;
+    return durationR;
+  }
+}
+
+void turnCheck()
+{
+  int readVal = pickASide();
+  if (turnDir)
+  {
+    if (readVal > 800)
+    {
+      leftError = true;
+    }
+    else
+    {
+      leftError = false;
+      turnLeft();
+      return;
+    } 
+  }
+  else
+  {
+    if (readVal > 800)
+    {
+      rightError = true;
+    }
+    else
+    {
+      rightError = false;
+      turnRight();
+      return;
+    }
+  }
+  if (true)
+  {
+    if ((rightError == true) || (leftError == true))
+    {
+      Serial.println("An error has occured with the turn direction choice mechanism. An arbitrary direction will be selected.");
+    }
+    else
+    {
+      Serial.println("Either both the left and right ultrasonic distance sensors gave the same readout, or something weird is going on. An arbitrary directions will be selected.");
+    }
+    turnRight();
+  }
+}
+
+void turnLeft()
+{
+  servoWrite(0);
+  Serial.println("Turning left!");
+}
+
+void turnRight()
+{
+  servoWrite(180);
+  Serial.println("Turning right!");
+}
+
+void readOut()
+{
+  Serial.print("Distance in inches: ");
+  Serial.println(inches);
+  Serial.print("Distance in centimeters: ");
+  Serial.println(cm);
+}
+
+void servoWrite(int angle)
+{
+  servo.write(angle);
+  servoAngle = angle;
+  Serial.print("Rotating to ");
+  Serial.print(angle);
+  Serial.println(" degrees.");
+}
