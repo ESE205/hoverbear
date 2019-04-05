@@ -1,10 +1,10 @@
 #include <Servo.h>
 
 const int servoPin = 6;
-const int rightTrig = 7;
-const int rightEcho = 8;
-const int leftTrig = 9;
-const int leftEcho = 10;
+const int rightTrig = 7; //The pin that communicates with the Right Ultrasonic Distance Sensor's Trig Pin.
+const int rightEcho = 8; //The pin that communicates with the Right Ultrasonic Distance Sensor's Echo Pin.
+const int leftTrig = 9; //The pin that communicates with the Left Ultrasonic Distance Sensor's Trig Pin.
+const int leftEcho = 10; //The pin that communicates with the Left Ultrasonic Distance Sensor's Echo Pin.
 unsigned long duration, durationL, durationR, cm, inches;
 boolean leftError, rightError, turnDir;
 unsigned long delta = 0;
@@ -25,7 +25,7 @@ void setup()
 
   servo.attach(servoPin);
 
-  //This line is to set the servo motor to it's middle position, since it isn't able to rotate in the negative direction.
+  //This line is to set the servo motor to it's middle position, since it can't rotate in the negative direction.
   servoWrite(90);
 }
 
@@ -37,13 +37,14 @@ void loop() {
     {
       turnCheck();
     }
-    readOut(); // debug info about the ultrasonic distance sensor readouts. serves no other purpose
+    readOut(); // debug info about the ultrasonic distance sensor readouts.
     delta += interval; //more delta timing
   }
 }
 
 void calcDistance() // calculates the distance the nearest barrier in centimeters and inches
 {
+  //Initialize the Left Ultrasonic Distance Sensor
   digitalWrite(leftTrig, LOW);
   delayMicroseconds(5);
   digitalWrite(leftTrig, HIGH);
@@ -55,7 +56,8 @@ void calcDistance() // calculates the distance the nearest barrier in centimeter
   // of the ping to the reception of its echo off of an object.
   pinMode(leftEcho, INPUT);
   durationL = pulseIn(leftEcho, HIGH);
-
+  
+//Initialize the Right Ultrasonic Distance Sensor
   digitalWrite(rightTrig, LOW);
   delayMicroseconds(5);
   digitalWrite(rightTrig, HIGH);
@@ -65,8 +67,7 @@ void calcDistance() // calculates the distance the nearest barrier in centimeter
   pinMode(rightEcho, INPUT);
   durationR = pulseIn(rightEcho, HIGH);
 
-  if (durationL < durationR)
-  {
+  if (durationL < durationR) //Sets the duration variable as the shoortest duration time.
     duration = durationL;
   }
   else
@@ -75,16 +76,16 @@ void calcDistance() // calculates the distance the nearest barrier in centimeter
   }
 
   //randomnerdtutorials.com code begins here
-  // Convert the time into a distance
+  // Convert the duration variable into the distance from the closest obstacle in sight of the UDS
   cm = (duration / 2) / 29.1;   // Divide by 29.1 or multiply by 0.0343
   inches = (duration / 2) / 74; // Divide by 74 or multiply by 0.0135
   //randomnerdtutorials.com code ends here
   //https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/
 }
 
-boolean obstacle() //checks for obstacles
+boolean obstacle() //checks for obstacles. Returns true if there is an obstacle within 20cm of the vehicle, false otherwise.
 {
-  if (cm < 20)
+  if (cm < 20) 
   {
     Serial.println("There is an obstacle");
     Serial.println(cm);
@@ -97,7 +98,7 @@ boolean obstacle() //checks for obstacles
   }
 }
 
-int pickASide() // decides which direction the drone will turn
+int pickASide() //Assists the turnCheck() method in determining which direction the servo should rotate
 {
   if (durationL < durationR)
   {
@@ -154,21 +155,21 @@ void turnCheck() // makes sure that there were no errors in the selection of tur
   }
 }
 
-void turnLeft() // initiates left turn
+void turnLeft() //This Method calls the Servo to begin rotating to the left. 
 {
   servoWrite(0);
   Serial.println("Turning left!");
   turning();
 }
 
-void turnRight() // initiates right turn
+void turnRight() //This Method calls the Servo to begin rotating to the right.
 {
   servoWrite(180);
   Serial.println("Turning right!");
   turning();
 }
 
-void turning() // keeps the drone turning until there is no obstacle in the way, then returns the drone to going straight
+void turning() //Calls the servo motor to return to a straight angle once obstacle() returns false.
 {
   while (obstacle())
   {
@@ -177,7 +178,7 @@ void turning() // keeps the drone turning until there is no obstacle in the way,
   servoWrite(90);
 }
 
-void readOut() // usds debug info yay
+void readOut() //Outputs the distances from obstacles that Ultrasonic Distance Sensors are calculating
 {
   Serial.print("Distance in inches: ");
   Serial.println(inches);
