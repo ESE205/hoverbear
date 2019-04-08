@@ -23,10 +23,10 @@ void setup()
 {
   Serial.begin(9600);
 
-  pinMode(leftTrig, OUTPUT);
-  pinMode(leftEcho, INPUT);
-  pinMode(rightTrig, OUTPUT);
-  pinMode(rightEcho, INPUT);
+  pinMode(leftTrig, OUTPUT); //Outputs a sound signal
+  pinMode(leftEcho, INPUT); //Recieves the sound signal
+  pinMode(rightTrig, OUTPUT); //Outputs a sound signal
+  pinMode(rightEcho, INPUT); //Recieves the sound signal
 
   servo.attach(servoPin);
 
