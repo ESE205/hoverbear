@@ -5,12 +5,12 @@
 #include <Servo.h>
 
 const int servoPin = 6; // servo motor pin
-const int rightTrig = 7; // the pin that communicates with the Right Ultrasonic Distance Sensor's Trig Pin.
-const int rightEcho = 8; // the pin that communicates with the Right Ultrasonic Distance Sensor's Echo Pin.
-const int leftTrig = 9; // the pin that communicates with the Left Ultrasonic Distance Sensor's Trig Pin.
-const int leftEcho = 10; // the pin that communicates with the Left Ultrasonic Distance Sensor's Echo Pin.
+const int rightTrig = 7; //Communicates with Right Ultrasonic Distance Sensor's Trig Pin.
+const int rightEcho = 8; //Communicates with Right Ultrasonic Distance Sensor's Echo Pin.
+const int leftTrig = 9; //Communicates with Left Ultrasonic Distance Sensor's Trig Pin.
+const int leftEcho = 10; //Communicates with Left Ultrasonic Distance Sensor's Echo Pin.
 unsigned long duration, durationL, durationR, cm, inches; //initializes some variables for future reference
-boolean leftError, rightError, turnDir; //initializes some variables for future reference
+boolean leftError, rightError, turnDir; //initializes variables for future reference
 unsigned long delta = 0; // the variable that stores the next time void loop will run
 const int interval = 100; // the variable that says how much time will pass between void loop iterations
 const int range = 100; // the variabe that decides at what distance the ultrasonic distance sensor will react
@@ -35,9 +35,9 @@ void setup()
 }
 
 void loop() {
-  if (millis() > delta) // delta timing yay          probably not needed in the final code, but while the code is still being worked on not having debug info be fired out at hundreds of lines a second is nice
+  if (millis() > delta) // delta timing not needed in final code, but while the code is still being worked on not having debug info be fired out at hundreds of lines a second is nice
   {
-    calcDistance(); // calculates the distance the nearest barrier in centimeters and inches
+    calcDistance(); // calculates distance from nearest obstacle in centimeters and inches
     if (obstacle()) // checks for obstacles, and if an obstacle if found, goes through the turning procedure
     {
       turnCheck();
@@ -47,7 +47,7 @@ void loop() {
   }
 }
 
-void calcDistance() // calculates the distance the nearest barrier in centimeters and inches
+void calcDistance() // calculates the distance the nearest obstacle in centimeters and inches
 {
   digitalWrite(leftTrig, LOW);
   delayMicroseconds(5);
@@ -84,7 +84,8 @@ void calcDistance() // calculates the distance the nearest barrier in centimeter
   //randomnerdtutorials.com code ends here
 }
 
-boolean obstacle() //checks for obstacles. Returns true if there is an obstacle within the range (variable defined at top of code) of the vehicle, false otherwise.
+boolean obstacle() //checks for obstacles. Returns true if an obstacle is within range of the vehicle.
+                   //false otherwise.
 {
   if (cm < range)
   {
@@ -113,7 +114,7 @@ int pickASide() // decides which direction the drone will turn
   }
 }
 
-void turnCheck() // makes sure that there were no errors in the selection of turn direction and actually calls the turn direction, could probably be combined with pickASide
+void turnCheck() //Outputs errors in the selection of turn direction and actually calls the turn direction, could probably be combined with pickASide
 {
   int readVal = pickASide();
   if (turnDir)
