@@ -9,8 +9,15 @@ const int rightTrig = 7; //Communicates with Right Ultrasonic Distance Sensor's 
 const int rightEcho = 8; //Communicates with Right Ultrasonic Distance Sensor's Echo Pin.
 const int leftTrig = 9; //Communicates with Left Ultrasonic Distance Sensor's Trig Pin.
 const int leftEcho = 10; //Communicates with Left Ultrasonic Distance Sensor's Echo Pin.
-unsigned long duration, durationL, durationR, cm, inches; //initializes some variables for future reference
-boolean leftError, rightError, turnDir; //initializes variables for future reference
+unsigned long duration, durationL, durationR, cm, inches; /*initializes some variables for future reference:
+durationL is how long it takes the left ultrasonic distance sensor signal to return to the echo pin, durationR is the same for the right sensor
+duration is whichever one is shorter (durationL or durationR) as that's the side where the obstacle is closer
+cm is the distance value converted to centimeters, and inches is the distance value converted to inches
+*/
+boolean leftError, rightError, turnDir; /*initializes variables for future reference:
+leftError checks to see if the left usds read an error value (value > 800), rightError is the same for the right usds
+turnDir stores which direction the turn will be in, left is true and right is false
+*/
 unsigned long delta = 0; // the variable that stores the next time void loop will run
 const int interval = 100; // the variable that says how much time will pass between void loop iterations
 const int range = 100; // the variabe that decides at what distance the ultrasonic distance sensor will react
@@ -81,7 +88,6 @@ void calcDistance() // calculates the distance the nearest obstacle in centimete
   // Convert the time into a distance
   cm = (duration / 2) / 29.1;   // Divide by 29.1 or multiply by 0.0343
   inches = (duration / 2) / 74; // Divide by 74 or multiply by 0.0135
-  //randomnerdtutorials.com code ends here
 }
 
 boolean obstacle() //checks for obstacles. Returns true if an obstacle is within range of the vehicle.
