@@ -24,6 +24,32 @@ const int range = 100; // the variabe that decides at what distance the ultrason
 
 Servo servo;
 
+// Reference materials:
+// https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/
+// https://www.intorobotics.com/tutorial-how-to-control-the-tower-pro-sg90-servo-with-arduino-uno/
+
+#include <Servo.h>
+
+const int servoPin = 6; // servo motor pin
+const int rightTrig = 7; //Communicates with Right Ultrasonic Distance Sensor's Trig Pin.
+const int rightEcho = 8; //Communicates with Right Ultrasonic Distance Sensor's Echo Pin.
+const int leftTrig = 9; //Communicates with Left Ultrasonic Distance Sensor's Trig Pin.
+const int leftEcho = 10; //Communicates with Left Ultrasonic Distance Sensor's Echo Pin.
+unsigned long duration, durationL, durationR, cm, inches; /*initializes some variables for future reference:
+durationL is how long it takes the left ultrasonic distance sensor signal to return to the echo pin, durationR is the same for the right sensor
+duration is whichever one is shorter (durationL or durationR) as that's the side where the obstacle is closer
+cm is the distance value converted to centimeters, and inches is the distance value converted to inches
+*/
+boolean leftError, rightError, turnDir; /*initializes variables for future reference:
+leftError checks to see if the left usds read an error value (value > 800), rightError is the same for the right usds
+turnDir stores which direction the turn will be in, left is true and right is false
+*/
+unsigned long delta = 0; // the variable that stores the next time void loop will run
+const int interval = 100; // the variable that says how much time will pass between void loop iterations
+const int range = 100; // the variabe that decides at what distance the ultrasonic distance sensor will react
+
+Servo servo;
+
 int servoAngle = 0;
 
 void setup()
@@ -104,6 +130,106 @@ boolean obstacle() //checks for obstacles. Returns true if an obstacle is within
     Serial.println("There is no obstacle");
     return false;
   }
+}
+
+int pickASide() // decides which direction the drone will turn
+{
+  if (durationL < durationR)
+  {
+    turnDir = true;  //left
+    return durationL;
+  }
+  else
+  {
+    turnDir = false;  //right
+    return durationR;
+  }
+}
+
+void turnCheck() //Outputs errors in the selection of turn direction and actually calls the turn direction, could probably be combined with pickASide
+{
+  int readVal = pickASide();
+  if (turnDir)
+  {
+    if (readVal > 800)
+    {
+      leftError = true;
+    }
+    else
+    {
+      leftError = false;
+      turnLeft();
+      return;
+    }
+  }
+  else
+  {
+    if (readVal > 800)
+    {
+      rightError = true;
+    }
+    else
+    {
+      rightError = false;
+      turnRight();
+      return;
+    }
+  }
+  if (true)
+  {
+    if ((rightError == true) || (leftError == true))
+    {
+      Serial.println("An error has occured with the turn direction choice mechanism. No turn will be made.");
+    }
+    else
+    {
+      Serial.println("This message shouldn't ever appear, so if it did, you done fricked up. No turn will be made.");
+    }
+  }
+}
+
+void turnLeft() // tells the servo to turn left
+{
+  servoWrite(0);
+  Serial.println("Turning left!");
+  turning();
+}
+
+void turnRight() // tells the servo to turn right
+{
+  servoWrite(180);
+  Serial.println("Turning right!");
+  turning();
+}
+
+void turning() // tells the servo motor to return to its initial position once obstacle() is false
+{
+  while (obstacle())
+  {
+    calcDistance();
+    //turnCheck();          //currently commented out because I haven't gotten to test it yet, but could theoretically allow for changing turn direction mid-turn, which is currently not possible
+    //Serial.println(durationL);
+    //Serial.println(durationR);
+  }
+  servoWrite(90);
+}
+
+void readOut() // outputs info from the ultrasonic distance sensors
+{
+  Serial.print("Distance in inches: ");
+  Serial.println(inches);
+  Serial.print("Distance in centimeters: ");
+  Serial.println(cm);
+}
+
+void servoWrite(int angle) // because if there's a function that tracks what angle the servo motor is at, I don't know what it is
+{
+  servo.write(angle);
+  servoAngle = angle;
+  Serial.print("Rotating to ");
+  Serial.print(angle);
+  Serial.println(" degrees.");
+}
 }
 
 int pickASide() // decides which direction the drone will turn
