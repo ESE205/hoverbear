@@ -14,7 +14,7 @@ durationL is how long it takes the left ultrasonic distance sensor signal to ret
 duration is whichever one is shorter (durationL or durationR) as that's the side where the obstacle is closer
 cm is the distance value converted to centimeters, and inches is the distance value converted to inches
 */
-boolean leftError, rightError, turnDir; /*initializes variables for future reference:
+boolean error, turnDir; /*initializes variables for future reference:
 leftError checks to see if the left usds read an error value (value > 800), rightError is the same for the right usds
 turnDir stores which direction the turn will be in, left is true and right is false
 */
@@ -23,7 +23,7 @@ const int interval = 100; // the variable that says how much time will pass betw
 const int range = 100; // the variabe that decides at what distance the ultrasonic distance sensor will react
 const int right = 180;
 const int left = 90;
-const int centered = 140;
+const int centered = 150;
 
 Servo servo;
 
@@ -42,6 +42,7 @@ void setup()
 
   //This line is to set the servo motor to it's middle position, since it isn't able to rotate in the negative direction.
   servoWrite(centered);
+  cm = 0;
 }
 
 void loop() {
@@ -99,7 +100,6 @@ boolean obstacle() //checks for obstacles. Returns true if an obstacle is within
   if (cm < range)
   {
     Serial.println("There is an obstacle");
-    Serial.println(cm);
     return true;
   }
   else
@@ -111,6 +111,7 @@ boolean obstacle() //checks for obstacles. Returns true if an obstacle is within
 
 int pickASide() // decides which direction the drone will turn
 {
+  Serial.println(cm);
   if (durationL < durationR)
   {
     turnDir = true;  //left
@@ -130,11 +131,11 @@ void turnCheck() //Outputs errors in the selection of turn direction and actuall
   {
     if (readVal > 800)
     {
-      leftError = true;
+      error = true;
     }
     else
     {
-      leftError = false;
+      error = false;
       turnLeft();
       return;
     }
@@ -143,18 +144,18 @@ void turnCheck() //Outputs errors in the selection of turn direction and actuall
   {
     if (readVal > 800)
     {
-      rightError = true;
+      error = true;
     }
     else
     {
-      rightError = false;
+      error = false;
       turnRight();
       return;
     }
   }
   if (true)
   {
-    if ((rightError == true) || (leftError == true))
+    if (error == true)
     {
       Serial.println("An error has occured with the turn direction choice mechanism. No turn will be made.");
     }
@@ -181,10 +182,10 @@ void turnRight() // tells the servo to turn right
 
 void turning() // tells the servo motor to return to its initial position once obstacle() is false
 {
+  delay(3000);
   while (obstacle())
   {
     calcDistance();
-    delay(500);
     /* maybe put a u-turn thingy here at some point
      * 
      * 
